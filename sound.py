@@ -101,15 +101,16 @@ class snd_dns_cal :
         ##
         ##
         ## return result matrix
-        return result_mat
+        return result_mat.mean(axis=2)
 
 if __name__ == "__main__":
     FILE_PATH = './data/'
     OUTPUT_PATH = './output'
     DATA_LOC = 'blues.00000.wav'
     cls_data = snd_dns_cal(os.path.join(FILE_PATH,DATA_LOC))
-    result = cls_data.cal_dns_mat()
-    final_mat = result.mean(axis=2)
+    final_mat = cls_data.cal_dns_mat()
+    #final_mat = result.mean(axis=2)
     print(final_mat.shape)
+
     plt.imshow(final_mat, cmap='gray')
     plt.savefig(os.path.join(OUTPUT_PATH,'fig1.png'), dpi=300)
