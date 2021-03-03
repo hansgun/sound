@@ -29,8 +29,8 @@ class snd_dns_cal :
         self.samplerate, self.test_sound  = wavfile.read(self.wav_file_str)
         self.DIMEN_N = int(round(sqrt(len(self.test_sound)),0)-1)
         self.DIMEN_N_2 = self.DIMEN_N**2
-        self.test_sound_2d = self.test_sound[:self.DIMEN_N_2].reshape(-1,self.DIMEN_N)
-
+        #self.test_sound_2d = self.test_sound[:self.DIMEN_N_2].reshape(-1,self.DIMEN_N)
+        self.test_sound_2d = self.test_sound[:DIMEN_N_2].reshape((self.DIMEN_N,self.DIMEN_N), order='F')
     def normalization(self) : 
         scaler = MinMaxScaler()
 
