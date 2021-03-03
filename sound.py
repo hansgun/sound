@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.io import wavfile
 from math import sqrt
-from sklearn.preprocessing import MinMaxScaler
 import os
 
 class snd_dns_cal :
@@ -32,7 +31,9 @@ class snd_dns_cal :
         #self.test_sound_2d = self.test_sound[:self.DIMEN_N_2].reshape(-1,self.DIMEN_N)
         self.test_sound_2d = self.test_sound[:self.DIMEN_N_2].reshape((self.DIMEN_N,self.DIMEN_N), order='F')
 
+    ## deprecated
     def normalization_bak(self) : 
+        from sklearn.preprocessing import MinMaxScaler
         scaler = MinMaxScaler()
 
         test_sound_2d_norm = scaler.fit_transform(self.test_sound_2d) * 255
@@ -40,7 +41,7 @@ class snd_dns_cal :
 
     def normalization(self) : 
         min_val, max_val = np.min(self.test_sound_2d), np.max(self.test_sound_2d)
-        self.test_sound_2d_norm = ((self.test_sound_2d - min_val) / (max_val + -1 * min_val) * 255).astype(int) 
+        self.test_sound_2d_norm = ((self.test_sound_2d - min_val) / ((max_val + -1 * min_val) if min_val < 0 else max_val - min_val) * 255).astype(int) 
 
     def get_pages(self) : 
         '''
