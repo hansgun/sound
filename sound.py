@@ -30,13 +30,18 @@ class snd_dns_cal :
         self.DIMEN_N = int(round(sqrt(len(self.test_sound)),0)-1)
         self.DIMEN_N_2 = self.DIMEN_N**2
         #self.test_sound_2d = self.test_sound[:self.DIMEN_N_2].reshape(-1,self.DIMEN_N)
-        self.test_sound_2d = self.test_sound[:DIMEN_N_2].reshape((self.DIMEN_N,self.DIMEN_N), order='F')
-    def normalization(self) : 
+        self.test_sound_2d = self.test_sound[:self.DIMEN_N_2].reshape((self.DIMEN_N,self.DIMEN_N), order='F')
+
+    def normalization_bak(self) : 
         scaler = MinMaxScaler()
 
         test_sound_2d_norm = scaler.fit_transform(self.test_sound_2d) * 255
         self.test_sound_2d_norm = test_sound_2d_norm.astype(int)
-        
+
+    def normalization(self) : 
+        min_val, max_val = np.min(self.test_sound_2d), np.max(self.test_sound_2d)
+        self.test_sound_2d_norm = ((self.test_sound_2d - min_val) / (max_val + -1 * min_val) * 255).astype(int) 
+
     def get_pages(self) : 
         '''
         전체 matrix를 계산할 sub-matrix 로 분할하여 그 리스트를 return 하는 함수
@@ -46,7 +51,7 @@ class snd_dns_cal :
         size_x, size_y = self.test_sound_2d.shape
         div_ = self.search_size + self.neighbor_size - 1
         ind_x, ind_y = size_x // div_, size_y // div_
-        cent_p = (div_ -1, div_ -1)
+        #cent_p = (div_ -1, div_ -1)
 
         ## slicing
         for i in range(ind_x) : 
