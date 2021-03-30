@@ -11,7 +11,7 @@ class snd_dns_cal :
         #self.wav_file_str = wav_file_str
         self.search_size = search_size
         self.neighbor_size = neighbor_size
-        print('\t search_size : ', self.search_size, '\t neighbor_size :', self.neighbor_size)
+        print('dns_cal ::', '\t search_size : ', self.search_size, '\t neighbor_size :', self.neighbor_size)
 
     def log_specgram(self, audio, sample_rate, window_size=20,step_size=10, eps=1e-10):
         nperseg = int(round(window_size * sample_rate / 1e3))
@@ -100,8 +100,8 @@ class snd_dns_cal :
         2개의 matrix의 ED distance를 return 하는 함수
         round_arg : 소숫점 자리수. default : 1
         '''
-        temp_nd = (nd_1 - nd_2).reshape(-1) ** 2
-        return round(math.sqrt(sum(temp_nd)),round_arg)
+        #print(np.sum(np.sqrt((nd_1-nd_2)**2)))
+        return round(np.sqrt(np.sum((nd_1-nd_2)**2)),round_arg)
 
     
     def cal_dns_mat(self) :
@@ -143,14 +143,15 @@ class snd_dns_cal :
         return result_mat.mean(axis=2)
 
 if __name__ == "__main__":
-    FILE_PATH = '../data/'
-    OUTPUT_PATH = '../output'
+    HOME_PATH = '/Users/han/Documents/code/python/sound/'
+    FILE_PATH = 'data/'
+    OUTPUT_PATH = 'output'
     DATA_LOC = 'blues.00000.wav'
-    cls_data = snd_dns_cal().get_wave_file(os.path.join(FILE_PATH,DATA_LOC))
+    cls_data = snd_dns_cal().get_wave_file(os.path.join(HOME_PATH,FILE_PATH,DATA_LOC))
     final_mat = cls_data.cal_dns_mat()
     #final_mat = result.mean(axis=2)
     print('\n---------------final_mat------------\n\n')
     print(final_mat)
 
     plt.imshow(final_mat, cmap='gray')
-    plt.savefig(os.path.join(OUTPUT_PATH,'fig1.png'), dpi=300)
+    plt.savefig(os.path.join(HOME_PATH,OUTPUT_PATH,'fig1.png'), dpi=300)
