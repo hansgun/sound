@@ -1,10 +1,10 @@
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.io import wavfile
 import math
 import os
+from numpy import linalg as LA
 
 class snd_dns_cal :
     def __init__(self, search_size=21, neighbor_size=13) : 
@@ -95,13 +95,32 @@ class snd_dns_cal :
         #print(self.ND_LIST)
         return self.ND_LIST  
 
+    def get_pages_bak(self) :
+        '''
+        전체 matrix를 계산할 sub-matrix 로 분할하여 그 리스트를 return 하는 함수
+        '''
+        self.ND_LIST = []
+        ## calcluate n*n 의 갯수
+        size_x, size_y = self.test_sound_2d.shape
+        div_ = self.search_size + self.neighbor_size - 1
+        ind_x, ind_y = size_x // div_, size_y // div_
+        #cent_p = (div_ -1, div_ -1)
+
+        ## slicing
+        for i in range(ind_x) : 
+            for j in range(ind_y) : 
+                self.ND_LIST.append(self.test_sound_2d_norm[i*div_:(i+1)*div_,j*div_:(j+1)*div_])
+        
+        #print(self.ND_LIST)
+        return self.ND_LIST 
+    
     def ed_dist(self, nd_1, nd_2, round_arg = 1) :
         '''
         2개의 matrix의 ED distance를 return 하는 함수
         round_arg : 소숫점 자리수. default : 1
         '''
         #print(np.sum(np.sqrt((nd_1-nd_2)**2)))
-        return round(np.sqrt(np.sum((nd_1-nd_2)**2)),round_arg)
+        #return round(np.sqrt(np.sum((nd_1-nd_2)**2)),round_arg)
 
     
     def cal_dns_mat(self) :
@@ -116,18 +135,18 @@ class snd_dns_cal :
         CENT_P = (self.search_size//2 + self.neighbor_size//2 , self.search_size//2 + self.neighbor_size//2 )
         
         ### result array
-        result_mat = np.array(np.zeros((self.search_size,self.search_size,len(self.ND_LIST))))
+        result_mat = np.zeros((self.search_size,self.search_size))
         #print(nd_array[0][CENT_P[0]-(neighbor_size//2):CENT_P[0]+(neighbor_size//2)+1,CENT_P[1]-(neighbor_size//2):CENT_P[1]+(neighbor_size//2)+1].shape)
         
         ## for phase
         for ind_mat, mat_x in enumerate(self.ND_LIST) : ## number of nd_array
-            single_mat = np.zeros((self.search_size,self.search_size))
+            single_mat = np.empty((self.search_size,self.search_size))
             #print('----init....\n',single_mat, '\n\n')
             for x in range(self.search_size) : ## size of x-axis
                 for y in range(self.search_size) : ## size of y-axis
                     ## calculate ED distance
                     ## update result of matrix
-                    single_mat[x,y] = self.ed_dist(mat_x[x:x+self.neighbor_size,y:y+self.neighbor_size],
+                    single_mat[x,y] = LA.norm(mat_x[x:x+self.neighbor_size,y:y+self.neighbor_size] - 
                                             mat_x[CENT_P[0]-(self.neighbor_size//2):CENT_P[0]+(self.neighbor_size//2)+1,CENT_P[1]-(self.neighbor_size//2):CENT_P[1]+(self.neighbor_size//2)+1])
             #print('----after update....\n',single_mat, '\n\n')
             ## update center of matrix as np.zeros
@@ -135,23 +154,27 @@ class snd_dns_cal :
             
             #print('----finally....\n',single_mat, '\n\n')
             ## put matrix to final result matrix
-            result_mat[:,:,ind_mat] = single_mat
+            result_mat = result_mat + single_mat
         ## get a mean value of each cell finally
         ##
         ##
         ## return result matrix
-        return result_mat.mean(axis=2)
+        return result_mat / len(self.ND_LIST)
 
 if __name__ == "__main__":
-    HOME_PATH = '/Users/han/Documents/code/python/sound/'
+    import time
+    #HOME_PATH = '/Users/han/Documents/code/python/sound/'
+    HOME_PATH = 'C://git/sound/'
     FILE_PATH = 'data/'
     OUTPUT_PATH = 'output'
     DATA_LOC = 'blues.00000.wav'
+    start_time = time.time()
     cls_data = snd_dns_cal().get_wave_file(os.path.join(HOME_PATH,FILE_PATH,DATA_LOC))
     final_mat = cls_data.cal_dns_mat()
+    print('execution time :', time.time() - start_time)
     #final_mat = result.mean(axis=2)
     print('\n---------------final_mat------------\n\n')
-    print(final_mat)
+    #print(final_mat)
 
     plt.imshow(final_mat, cmap='gray')
-    plt.savefig(os.path.join(HOME_PATH,OUTPUT_PATH,'fig1.png'), dpi=300)
+    #plt.savefig(os.path.join(HOME_PATH,OUTPUT_PATH,'fig1.png'), dpi=300)
