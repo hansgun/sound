@@ -140,14 +140,17 @@ class snd_dns_cal :
         
         ## for phase
         for ind_mat, mat_x in enumerate(self.ND_LIST) : ## number of nd_array
-            single_mat = np.empty((self.search_size,self.search_size))
+            single_mat = np.zeros((self.search_size,self.search_size))
             #print('----init....\n',single_mat, '\n\n')
             for x in range(self.search_size) : ## size of x-axis
                 for y in range(self.search_size) : ## size of y-axis
                     ## calculate ED distance
                     ## update result of matrix
-                    single_mat[x,y] = LA.norm(mat_x[x:x+self.neighbor_size,y:y+self.neighbor_size] - 
-                                            mat_x[CENT_P[0]-(self.neighbor_size//2):CENT_P[0]+(self.neighbor_size//2)+1,CENT_P[1]-(self.neighbor_size//2):CENT_P[1]+(self.neighbor_size//2)+1])
+                    single_mat[x,y] = LA.norm(mat_x[x:x+self.neighbor_size,y:y+self.neighbor_size] - mat_x[CENT_P[0]-(self.neighbor_size//2):CENT_P[0]+(self.neighbor_size//2)+1,CENT_P[1]-(self.neighbor_size//2):CENT_P[1]+(self.neighbor_size//2)+1])
+            
+            #single_mat = np.array([LA.norm(mat_x[x:x+self.neighbor_size,y:y+self.neighbor_size] - 
+            #                               mat_x[CENT_P[0]-(self.neighbor_size//2):CENT_P[0]+(self.neighbor_size//2)+1,CENT_P[1]-(self.neighbor_size//2):CENT_P[1]+(self.neighbor_size//2)+1]) 
+            #                       for y in range(self.search_size) for x in range(self.search_size)]).reshape((self.search_size,self.search_size), order='F')
             #print('----after update....\n',single_mat, '\n\n')
             ## update center of matrix as np.zeros
             #single_mat[CENT_P,CENT_P] = 0 
@@ -164,7 +167,7 @@ class snd_dns_cal :
 if __name__ == "__main__":
     import time
     #HOME_PATH = '/Users/han/Documents/code/python/sound/'
-    HOME_PATH = 'C://git/sound/'
+    HOME_PATH = ''
     FILE_PATH = 'data/'
     OUTPUT_PATH = 'output'
     DATA_LOC = 'blues.00000.wav'
