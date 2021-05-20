@@ -246,16 +246,25 @@ if __name__ == "__main__":
     NEIGHBOR_SIZE , SEARCH_SIZE = (13, 21)
     start_time = time.time()
     
-    
+    #########################
     ### test for multi-thread
-    MULTI_PROCESS = 1
+    MULTI_PROCESS = 8
+    #########################
     
     samplerate, sliced = snd_loader.snd_loader(os.path.join(HOME_PATH,FILE_PATH,DATA_LOC), 3, 1).get_snd_df()
     final_mat = np.zeros((SEARCH_SIZE,SEARCH_SIZE,len(sliced)))
     
+    def cal_final_map(sliced, samplerate=samplerate) :
+        #return snd_dns_cal(neighbor_size=NEIGHBOR_SIZE, search_size=SEARCH_SIZE).set_snd_data(sliced,samplerate).cal_dns_mat()
+        return snd_dns_cal().set_snd_data(sliced,samplerate).cal_dns_mat()
+ 
     
     #### single thread
-    if MULTI_PROCESS <= 1 : 
+    if MULTI_PROCESS <= 1 :
+        '''
+        ### windows 에서 
+        ### 200 개, execution time : 81.53022837638855
+        '''
         print('single')
         #cls_data = snd_dns_cal().get_wave_file(os.path.join(HOME_PATH,FILE_PATH,DATA_LOC))
         #final_mat = cls_data.cal_dns_mat()
@@ -266,16 +275,17 @@ if __name__ == "__main__":
     
     ## multi thread
     else :
+        '''
+        ### windows 에서 - multi-thread
+        ### 200 개, 8 thread, execution time : 138.04238629341125
+        '''
         print('multi :', MULTI_PROCESS)
         import concurrent.futures
         
         
-        
-        def cal_final_map(sliced) :
-            return snd_dns_cal(neighbor_size=NEIGHBOR_SIZE, search_size=SEARCH_SIZE).set_snd_data(sliced,samplerate).cal_dns_mat()
-
-        #with concurrent.futures.ProcessPoolExecutor(max_workers=MULTI_PROCESS) as executor:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=MULTI_PROCESS) as executor:
+        sliced = sliced[:200]
+        with concurrent.futures.ProcessPoolExecutor(max_workers=MULTI_PROCESS) as executor:
+        #with concurrent.futures.ThreadPoolExecutor(max_workers=MULTI_PROCESS) as executor:
             for number, node in zip(range(len(sliced)),executor.map(cal_final_map, sliced)):
                 final_mat[:,:,number] = node
                 print(number)
