@@ -9,24 +9,29 @@ Created on Mon Mar 15 17:54:34 2021
 import os
 from scipy.io import wavfile
 
-class snd_loader : 
-    def __init__(self, file_path, len_snd, interval_snd) :
+import os
+from scipy.io import wavfile
+
+
+class snd_loader:
+    def __init__(self, file_path, len_snd, interval_snd):
         self.file_path = file_path
-        try : 
-            self.samplerate, self.test_sound  = wavfile.read(self.file_path)
-        except Exception : 
+        try:
+            self.samplerate, self.test_sound = wavfile.read(self.file_path)
+        except Exception:
             print('Error::: not a vaild file path')
 
         self.len_snd = len_snd
         self.interval_snd = interval_snd
 
-        
-    def get_snd_df(self) :
-        #print(self.test_sound)
+    def get_snd_df(self):
+        # print(self.test_sound)
         ind_num = int((len(self.test_sound) // self.samplerate - self.len_snd) // self.interval_snd)
-        
-        self.sliced = list([self.test_sound[i*self.interval_snd*self.samplerate:(i*self.interval_snd+self.len_snd)*self.samplerate, 0 ] for i in range(ind_num)])
-        #print(self.sliced)
+
+        self.sliced = list([self.test_sound[i * self.interval_snd * self.samplerate:(
+                                                                                                i * self.interval_snd + self.len_snd) * self.samplerate,
+                            0] for i in range(ind_num)])
+        print('dns layer size :', len(self.sliced))
         return (self.samplerate, self.sliced)
 
 if __name__ == "__main__":
