@@ -1,8 +1,7 @@
 import os
-
 import numpy as np
-from numpy import linalg as LA
-
+from numba import njit
+import matplotlib.pyplot as plt
 NEIGHBOR_SIZE = 13
 SEARCH_SIZE = 21
 
@@ -46,14 +45,13 @@ def get_pages(test_sound_2d, search_size=SEARCH_SIZE, neighbor_size=NEIGHBOR_SIZ
     # print(self.ND_LIST)
     return np.asarray(result_list)
 
-
+@njit
 def distance_matrix(mat_x, search_win, search_size, neighbor_size):
-    return np.array([LA.norm(
-        mat_x[x:x + neighbor_size, y:y + neighbor_size] - search_win
-    ) for x in range(search_size)
-        for y in range(search_size)
-    ]
-    ).reshape(search_size, search_size, 1)
+    out = np.empty((search_size,search_size))
+    for x_in in range(search_size) :
+        for y_in in range(search_size) :
+            out[x_in,y_in] = np.sqrt(np.sum((mat_x[x_in:x_in + neighbor_size, y_in:y_in + neighbor_size] - search_win) ** 2))
+    return out.reshape(search_size,search_size,1)
 
 
 def cal_dns_mat(sliced_array, per_length, search_size=SEARCH_SIZE, neighbor_size=NEIGHBOR_SIZE):
@@ -92,24 +90,43 @@ if __name__ == "__main__":
     HOME_PATH = '/Users/hansgun/Documents/code/sound'
     DATA_DIR = 'data'
     MODULE_DIR = 'farms'
+    OUTPUT_DIR = 'out'
     sys.path.append(os.path.join(HOME_PATH, MODULE_DIR))
 
     # search_size=21, neighbor_size=13
     NEIGHBOR_SIZE = 13
     SEARCH_SIZE = 21
 
+    # check exec time start
+
     start_time = time.time()
+
+    # 1. read wavefile
     wav_file_str = os.path.join(HOME_PATH, DATA_DIR, 'real.wav')
     print(wav_file_str)
 
+    # 2. generate sound list... from parameters...
     samplerate, sliced = snd_loader.snd_loader(wav_file_str, 3, 1).get_snd_df()
 
+    # 3. normalization
     norm_sliced = normalization(sliced)
 
+    # 4. reshape
     reshaped = reshape_snd_data(np.array(sliced))
 
+    # 5. list divide by neighbor_size & search_size. to pages
     paged_norm_sliced = get_pages(reshaped)
 
+    # 6. calculate dns matrix
     result = cal_dns_mat(np.asarray(paged_norm_sliced), per_length=len(paged_norm_sliced[0]))
 
     print('elapsed : ', time.time() - start_time)
+
+    # 7. save result to pickle data format
+    #import pickle
+    #
+    #with open(os.path.join(HOME_PATH,OUTPUT_DIR,'data_real_wave_680.pickle'), 'wb') as f:
+    #    pickle.dump(result, f, pickle.HIGHEST_PROTOCOL)
+
+    # 8. ploting
+    plt.imshow(result[:,:,10], cmap='gray')
