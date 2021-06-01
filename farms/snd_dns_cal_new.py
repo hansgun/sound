@@ -95,7 +95,7 @@ if __name__ == "__main__":
     import sys
     import snd_loader
 
-    HOME_PATH = os.path.join(os.getcwd(), os.pardir)
+    HOME_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),os.pardir)
     #HOME_PATH = '/Users/hansgun/Documents/code/python/sound'
     DATA_DIR = 'data'
     MODULE_DIR = 'farms'

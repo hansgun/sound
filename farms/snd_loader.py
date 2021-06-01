@@ -35,7 +35,7 @@ class snd_loader:
         return (self.samplerate, self.sliced)
 
 if __name__ == "__main__":
-    SND_FILE_PATH = os.path.join(os.getcwd(), os.pardir)
+    SND_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),os.pardir)
     #SND_FILE_PATH = '/Users/han/Documents/code/python/sound/from_source/'
     FILE_NAME = 'real.wav'
     print(os.path.join(SND_FILE_PATH,FILE_NAME))
