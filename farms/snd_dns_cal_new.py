@@ -47,11 +47,19 @@ def get_pages(test_sound_2d, search_size=SEARCH_SIZE, neighbor_size=NEIGHBOR_SIZ
 
 @njit
 def distance_matrix(mat_x, search_win, search_size, neighbor_size):
+    '''
+    :param mat_x:
+    :param search_win:
+    :param search_size:
+    :param neighbor_size:
+    :return:
+    todo :: 결과 검증 하기
+    '''
     out = np.empty((search_size,search_size))
     for x_in in range(search_size) :
         for y_in in range(search_size) :
             out[x_in,y_in] = np.sqrt(np.sum((mat_x[x_in:x_in + neighbor_size, y_in:y_in + neighbor_size] - search_win) ** 2))
-    return out.reshape(search_size,search_size,1)
+    return out.reshape(search_size,search_size,1).T
 
 
 def cal_dns_mat(sliced_array, per_length, search_size=SEARCH_SIZE, neighbor_size=NEIGHBOR_SIZE):
@@ -87,7 +95,7 @@ if __name__ == "__main__":
     import sys
     import snd_loader
 
-    HOME_PATH = '/Users/hansgun/Documents/code/sound'
+    HOME_PATH = '/Users/hansgun/Documents/code/python/sound'
     DATA_DIR = 'data'
     MODULE_DIR = 'farms'
     OUTPUT_DIR = 'out'
