@@ -18,7 +18,8 @@ def reshape_snd_data(test_sound_2d_norm):
     ND_LIST = []
     # self.test_sound_2d = self.test_sound[:self.DIMEN_N_2].reshape(-1,self.DIMEN_N)
     for x in test_sound_2d_norm:
-        ND_LIST.append(x[:DIMEN_N_2].reshape((DIMEN_N, DIMEN_N), order='F'))
+        #ND_LIST.append(x[:DIMEN_N_2].reshape((DIMEN_N, DIMEN_N), order='F'))
+        ND_LIST.append(x[:DIMEN_N_2].reshape(-1, DIMEN_N))
     return ND_LIST
 
 
