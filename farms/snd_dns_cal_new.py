@@ -2,28 +2,28 @@ import os
 import numpy as np
 from numba import njit
 import matplotlib.pyplot as plt
+
 NEIGHBOR_SIZE = 13
 SEARCH_SIZE = 21
 
 
-def normalization(test_sound_2d):
+def normalization(test_sound_2d : np.ndarray ) -> int :
     min_val, max_val = np.min(test_sound_2d).astype(np.int32), np.max(test_sound_2d).astype(np.int32)
     return ((test_sound_2d - min_val) / (max_val - min_val) * 255).astype(int)
 
 
-def reshape_snd_data(test_sound_2d_norm):
+def reshape_snd_data(test_sound_2d_norm : np.ndarray ) -> list :
     import math
     DIMEN_N = int(round(math.sqrt(test_sound_2d_norm.shape[1]), 0) - 1)
     DIMEN_N_2 = DIMEN_N ** 2
     ND_LIST = []
-    # self.test_sound_2d = self.test_sound[:self.DIMEN_N_2].reshape(-1,self.DIMEN_N)
+
     for x in test_sound_2d_norm:
-        #ND_LIST.append(x[:DIMEN_N_2].reshape((DIMEN_N, DIMEN_N), order='F'))
         ND_LIST.append(x[:DIMEN_N_2].reshape(-1, DIMEN_N))
     return ND_LIST
 
 
-def get_pages(test_sound_2d, search_size=SEARCH_SIZE, neighbor_size=NEIGHBOR_SIZE):
+def get_pages(test_sound_2d, search_size : int = SEARCH_SIZE, neighbor_size: int = NEIGHBOR_SIZE) :
     """
     전체 matrix를 계산할 sub-matrix 로 분할하여 그 리스트를 return 하는 함수
     """
@@ -46,30 +46,32 @@ def get_pages(test_sound_2d, search_size=SEARCH_SIZE, neighbor_size=NEIGHBOR_SIZ
     # print(self.ND_LIST)
     return np.asarray(result_list)
 
+
 @njit
-def distance_matrix(mat_x, search_win, search_size, neighbor_size):
-    '''
-    :param mat_x:
-    :param search_win:
+def distance_matrix(mat_x, search_win , search_size : int , neighbor_size : int ) :
+    """
+    :param mat_x: neighborhood window maxrix
+    :param search_win: search window matrix
     :param search_size:
-    :param neighbor_size:
+    :param neighbor_size: size
     :return:
     todo :: 결과 검증 하기
-    '''
-    out = np.empty((search_size,search_size))
-    for x_in in range(search_size) :
-        for y_in in range(search_size) :
-            out[x_in,y_in] = np.sqrt(np.sum((mat_x[x_in:x_in + neighbor_size, y_in:y_in + neighbor_size] - search_win) ** 2))
-    return out.reshape(search_size,search_size,1).T
+    """
+    out = np.empty((search_size, search_size))
+    for x_in in range(search_size):
+        for y_in in range(search_size):
+            out[x_in, y_in] = np.sqrt(
+                np.sum((mat_x[x_in:x_in + neighbor_size, y_in:y_in + neighbor_size] - search_win) ** 2))
+    return out.reshape(search_size, search_size, 1)
 
 
-def cal_dns_mat(sliced_array, per_length, search_size=SEARCH_SIZE, neighbor_size=NEIGHBOR_SIZE):
+def cal_dns_mat(sliced_array , per_length : int , search_size : int =SEARCH_SIZE, neighbor_size : int =NEIGHBOR_SIZE) :
     """
     matrix array에 대한 dns 계산하여 np array (SEARCH_SIZE X SEARCH_SIZE X len(ND_LIST)) 를 return
     """
 
     # cent of matrix position
-    CENT_P = (search_size // 2 + neighbor_size // 2, search_size // 2 + neighbor_size // 2)
+    CENT_P : tuple(int,int) = (search_size // 2 + neighbor_size // 2, search_size // 2 + neighbor_size // 2)
 
     # result array
     result_mat = np.array([])
@@ -96,16 +98,16 @@ if __name__ == "__main__":
     import sys
     import snd_loader
 
-    HOME_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),os.pardir)
-    #HOME_PATH = '/Users/hansgun/Documents/code/python/sound'
+    HOME_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir)
+    # HOME_PATH = '/Users/hansgun/Documents/code/python/sound'
     DATA_DIR = 'data'
     MODULE_DIR = 'farms'
     OUTPUT_DIR = 'out'
     sys.path.append(os.path.join(HOME_PATH, MODULE_DIR))
 
     # search_size=21, neighbor_size=13
-    NEIGHBOR_SIZE = 13
-    SEARCH_SIZE = 21
+    NEIGHBOR_SIZE = 9
+    SEARCH_SIZE = 128
 
     # check exec time start
 
@@ -133,10 +135,12 @@ if __name__ == "__main__":
     print('elapsed : ', time.time() - start_time)
 
     # 7. save result to pickle data format
-    #import pickle
+    # import pickle
     #
-    #with open(os.path.join(HOME_PATH,OUTPUT_DIR,'data_real_wave_680.pickle'), 'wb') as f:
+    # with open(os.path.join(HOME_PATH,OUTPUT_DIR,'data_real_wave_680.pickle'), 'wb') as f:
     #    pickle.dump(result, f, pickle.HIGHEST_PROTOCOL)
 
     # 8. ploting
-    plt.imshow(result[:,:,10], cmap='gray')
+    plt.imshow(result[:, :, 10], cmap='gray')
+    plt.show()
+    print(f' shape : {result.shape}, {result.shape[2]}')
